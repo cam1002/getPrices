@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 import requests
 
 app = Flask(__name__)
@@ -23,16 +23,21 @@ def fetch_market_data():
 def get_market_data():
     try:
         data = fetch_market_data()
-        # return jsonify({
-        #     "status": "success",
-        #     "data": data
-        # })
-        return data
+        # 直接返回原始数据，并添加 CORS 头
+        response = Response(
+            response=data,
+            status=200,
+            mimetype="text/plain"
+        )
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
     except Exception as e:
-        return jsonify({
+        error_response = jsonify({
             "status": "error",
             "message": str(e)
-        }), 500
+        })
+        error_response.headers["Access-Control-Allow-Origin"] = "*"
+        return error_response, 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=82, debug=True)
